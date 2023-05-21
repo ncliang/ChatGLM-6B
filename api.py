@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from transformers import AutoTokenizer, AutoModel
 import uvicorn, json, datetime
 import torch
+import logging
 
 DEVICE = "cuda"
 DEVICE_ID = "0"
@@ -29,6 +30,9 @@ async def create_item(request: Request):
     max_length = json_post_list.get('max_length')
     top_p = json_post_list.get('top_p')
     temperature = json_post_list.get('temperature')
+    
+    logging.info("request: %s", str(json_post_list))
+
     response, history = model.chat(tokenizer,
                                    prompt,
                                    history=history,
@@ -43,8 +47,8 @@ async def create_item(request: Request):
         "status": 200,
         "time": time
     }
-    log = "[" + time + "] " + '", prompt:"' + prompt + '", response:"' + repr(response) + '"'
-    print(log)
+    # log = "[" + time + "] " + '", prompt:"' + prompt + '", response:"' + repr(response) + '"'
+    logging.info("prompt: '%s', resp: '%s'", prompt, repr(response))
     torch_gc()
     return answer
 
@@ -53,4 +57,4 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True)
     model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).half().cuda()
     model.eval()
-    uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
+    uvicorn.run(app, host='0.0.0.0', port=8000, workers=1, log_config="/root/ChatGLM-6B/logging.yaml")

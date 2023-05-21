@@ -1,0 +1,20 @@
+version: 1
+formatters:
+  simple:
+    format: "%(asctime)s - %(levelname)s - %(message)s"
+handlers:
+  rotating_file_handler:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: simple
+    filename: /var/log/chatglm.log
+    when: midnight
+    backupCount: 7
+  console_handler:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+root:
+  level: INFO
+  handlers: [rotating_file_handler]
+
